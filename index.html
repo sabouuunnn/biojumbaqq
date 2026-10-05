@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BIOQ — Biology Brain Games</title>
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0d1017; --panel:#1b1f29; --panel2:#262b38; --line:#2a2f3c; --text:#f2f4f8; --muted:#8b93a7;
+  --cyan:#4fd1dc; --green:#16a34a; --amber:#d97706; --gray:#3f4654; --pink:#ff5fa2; --violet:#5b5be6;
+  --y:#e5c64a; --g:#7cb52f; --b:#82b0f0; --p:#b07cf0;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0}
+#app{max-width:520px;margin:0 auto;min-height:100vh}
+.top{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.top h2{margin:0;font-size:24px;font-weight:800;flex:1}
+.ic{background:none;font-size:22px;width:36px;height:36px;display:grid;place-items:center;border-radius:10px}
+.ic svg{width:22px;height:22px}
+.wrap{padding:16px}
+.home{min-height:100vh;padding:28px 20px 40px;background:radial-gradient(120% 70% at 50% 8%,#14424a 0%,#0e1c2b 45%,#1b1634 80%,#0b0d14 100%)}
+.home.center{display:flex;flex-direction:column;justify-content:center;gap:16px}
+.logo{font-size:64px;font-weight:900;letter-spacing:-2px;color:#51d3de;text-align:center;margin:44px 0 36px}
+.sub{color:#cfd6e4;text-align:center;margin:0 0 8px;line-height:1.5}
+.card{display:block;width:100%;text-align:left;border-radius:26px;padding:20px 22px;margin-bottom:16px;border:1.5px solid rgba(255,255,255,.22);backdrop-filter:blur(8px)}
+.card h3{margin:0 0 6px;font-size:26px;font-weight:800}
+.card p{margin:0;font-size:15px;color:#f4e8c0}
+.c1{background:linear-gradient(135deg,#2f8a73,#2a6b66)}
+.c2{background:linear-gradient(135deg,#2d6a86,#27526f)}
+.c3{background:linear-gradient(135deg,#7b3b66,#8d1f55)}
+.c4{background:linear-gradient(135deg,#3f5fb0,#32447f)}
+.glass{display:block;margin:18px auto 0;min-width:230px;padding:18px 26px;border-radius:22px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.22);font-size:18px;font-weight:700;color:#e3e9f5}
+.field{width:100%;padding:16px;border-radius:16px;border:1.5px solid var(--line);background:#121722;color:var(--text);font-size:18px;text-align:center;outline:none}
+.field:focus{border-color:var(--cyan)}
+.btn{padding:15px 26px;border-radius:999px;font-weight:800;font-size:17px;background:var(--panel2);color:var(--text)}
+.btn.primary{background:#3b6cf6;color:#fff}
+.btn.ghost{background:transparent;border:1.5px solid var(--line)}
+.btn:disabled{opacity:.4}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.msg{min-height:26px;text-align:center;font-weight:700;margin:10px 0;color:#ffd166}
+/* quiz */
+.prog{height:8px;background:var(--panel);border-radius:8px;overflow:hidden}.prog>div{height:100%;background:linear-gradient(90deg,#3b6cf6,#51d3de);transition:width .3s}
+.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin:12px 0}
+.lv{padding:3px 10px;border-radius:99px;font-weight:700;font-size:12px}
+.l1{background:#1f4d3a;color:#8be9b4}.l2{background:#4a3f1b;color:#ffd166}.l3{background:#552a2a;color:#ff9a9a}.l4{background:#47235f;color:#d8a8ff}
+.qtext{font-size:22px;line-height:1.35;margin:10px 0 18px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;padding:15px 16px;border-radius:16px;background:var(--panel);border:1.5px solid var(--line);font-size:17px;font-weight:600}
+.opt b{width:28px;height:28px;border-radius:8px;background:var(--panel2);display:grid;place-items:center;font-size:14px;flex:none}
+.opt.ok{background:#14532d;border-color:#22c55e}.opt.bad{background:#5b1f1f;border-color:#ef4444}
+.big{font-size:56px;font-weight:900;text-align:center;margin:20px 0 4px}
+.center-t{text-align:center;color:var(--muted)}
+/* wordle */
+.board{display:grid;gap:7px;justify-content:center;margin:18px 0}
+.brow{display:grid;grid-template-columns:repeat(5,56px);gap:7px}
+.tile{height:56px;border-radius:10px;border:2px solid var(--line);display:grid;place-items:center;font-size:28px;font-weight:800;text-transform:uppercase}
+.tile.f{border-color:#5b6272}
+.tile.correct{background:var(--green);border-color:var(--green)}.tile.present{background:var(--amber);border-color:var(--amber)}.tile.absent{background:var(--gray);border-color:var(--gray)}
+.tile.rev{animation:flip .5s both}
+@keyframes flip{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.kb{display:grid;gap:7px;padding:0 4px}
+.kr{display:flex;gap:5px;justify-content:center}
+.key{flex:1;max-width:44px;height:52px;border-radius:9px;background:#252a35;font-weight:800;font-size:16px}
+.key.wide{max-width:66px;font-size:13px}
+.key.correct{background:var(--green)}.key.present{background:var(--amber)}.key.absent{background:#3a3f4b;color:#9aa2b3}
+.key.enter{background:var(--violet)}
+.clue{margin:8px 16px;padding:12px 14px;border-radius:14px;background:var(--panel);color:#cfd6e4;font-size:15px;line-height:1.4;text-align:center}
+/* connections */
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.ct{min-height:68px;border-radius:12px;background:#262b38;font-weight:800;font-size:clamp(9px,2.9vw,13px);text-transform:uppercase;padding:4px;word-break:break-word;line-height:1.15}
+.ct.sel{background:#f2f4f8;color:#111}
+.sg{border-radius:14px;padding:12px;text-align:center;color:#141414;margin-bottom:8px;animation:flip .4s both}
+.sg b{display:block;font-size:15px;text-transform:uppercase;letter-spacing:.3px}
+.sg span{font-size:13px;font-weight:600}
+.sg.y{background:var(--y)}.sg.g{background:var(--g)}.sg.b{background:var(--b)}.sg.p{background:var(--p)}
+.dots{display:flex;gap:8px;justify-content:center;align-items:center;color:var(--muted);font-size:14px}
+.dot{width:12px;height:12px;border-radius:50%;background:#d7dbe6}.dot.off{background:#3a3f4b}
+/* bridge */
+.ladder{display:grid;gap:8px;justify-content:center;margin:16px 0}
+.lrow{display:flex;gap:8px;justify-content:center}
+.lt{width:58px;height:58px;border-radius:12px;display:grid;place-items:center;font-size:26px;font-weight:800;background:#262a34;color:#7c8396;text-transform:uppercase}
+.lt.fixed{background:linear-gradient(135deg,#c2185b,#7a0f3a);color:#fff}
+.lt.done{background:linear-gradient(135deg,#2f8a73,#216154);color:#fff}
+.lt.act{border:2px solid var(--pink);color:#fff;background:#2e2430}
+.lt.hint{color:#ffb3d1}
+.brtitle{color:var(--pink)}
+/* board */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 4px}
+.tab{flex:none;padding:8px 14px;border-radius:99px;background:var(--panel);font-weight:700;font-size:14px;color:var(--muted)}
+.tab.on{background:#3b6cf6;color:#fff}
+.lb{padding:8px 16px 24px;display:grid;gap:8px}
+.lbr{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--panel)}
+.lbr.me{outline:2px solid var(--cyan)}
+.rk{width:30px;font-weight:900;color:var(--muted);text-align:center}
+.nm{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt{font-weight:900;color:var(--cyan)}
+.note{color:var(--muted);font-size:13px;text-align:center;padding:4px 16px}
+.stat{display:flex;justify-content:space-between;padding:14px 16px;background:var(--panel);border-radius:14px;margin-bottom:8px;font-weight:700}
+.stat span:last-child{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ============ helpers ============ */
+const app = document.getElementById('app');
+const GAMES = {quiz:'Bio Quiz', wordle:'Bio Wordle', conn:'Bio Connections', bridge:'Word Bridge'};
+const BARS = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
+function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+const total = s => Object.keys(GAMES).reduce((n, k) => n + ((s && s[k]) || 0), 0);
+
+let profile = load('bioq_profile_v2');
+let onKey = null, view = 'home';
+document.addEventListener('keydown', e => {
+  if (!onKey || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'Enter') onKey('ENTER');
+  else if (e.key === 'Backspace') onKey('DEL');
+  else if (/^[a-zA-Z]$/.test(e.key)) onKey(e.key.toUpperCase());
+});
+const press = k => onKey && onKey(k);
+
+/* ============ cloud (shared leaderboard when available) ============ */
+const cloud = {db:null, uid:null};
+async function initCloud(){
+  try {
+    if (!window.claude || !claude.use) return;
+    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+    if (!db || !user) return;
+    cloud.db = db; cloud.uid = await user.id();
+    if (profile) {
+      try {
+        const s = await db.collection('players').doc(cloud.uid).get();
+        if (s.exists) {
+          const d = s.data() || {};
+          for (const k in GAMES) {
+            profile.scores[k] = Math.max(profile.scores[k] || 0, (d.scores || {})[k] || 0);
+            profile.plays[k] = Math.max(profile.plays[k] || 0, (d.plays || {})[k] || 0);
+          }
+          save('bioq_profile_v2', profile);
+        }
+      } catch(e){}
+      pushCloud();
+    }
+  } catch(e){}
+}
+function pushCloud(){
+  if (!cloud.db || !profile) return;
+  try {
+    cloud.db.collection('players').doc(cloud.uid).set({
+      name: profile.name, scores: profile.scores, plays: profile.plays,
+      total: total(profile.scores), updated: Date.now()
+    }).catch(() => {});
+  } catch(e){}
+}
+function addScore(game, pts){
+  if (!profile) return;
+  profile.scores[game] = (profile.scores[game] || 0) + pts;
+  profile.plays[game] = (profile.plays[game] || 0) + 1;
+  save('bioq_profile_v2', profile);
+  pushCloud();
+}
+
+/* ============ navigation ============ */
+function go(v){
+  view = v; onKey = null; window.scrollTo(0, 0);
+  ({name:nameScreen, home:homeScreen, quiz:quizStart, wordle:wordleStart, conn:()=>connStart(), bridge:()=>bridgeStart(), board:()=>boardScreen('total'), me:meScreen})[v]();
+}
+const topbar = (t, color) => `<div class="top"><button class="ic" onclick="go('home')" aria-label="Back">←</button><h2 ${color ? `style="color:${color}"` : ''}>${t}</h2><button class="ic" onclick="go('board')" aria-label="Leaderboard">${BARS}</button></div>`;
+
+/* ============ name + home ============ */
+function nameScreen(){
+  app.innerHTML = `<div class="home center">
+    <h1 class="logo" style="margin-bottom:8px">BIOQ</h1>
+    <p class="sub">Biology brain games.<br>Enter your name to join the leaderboard.</p>
+    <input id="nm" class="field" maxlength="16" placeholder="Your name" value="${profile ? esc(profile.name) : ''}" autocomplete="nickname">
+    <div id="nmerr" class="msg"></div>
+    <button class="btn primary" onclick="saveName()">Let's play</button></div>`;
+}
+function saveName(){
+  const v = document.getElementById('nm').value.trim().replace(/\s+/g, ' ');
+  if (v.length < 2) { document.getElementById('nmerr').textContent = 'Please enter at least 2 characters.'; return; }
+  if (!profile) profile = {name:v, scores:{quiz:0,wordle:0,conn:0,bridge:0}, plays:{quiz:0,wordle:0,conn:0,bridge:0}};
+  else profile.name = v;
+  save('bioq_profile_v2', profile); pushCloud(); go('home');
+}
+function homeScreen(){
+  if (!profile) return nameScreen();
+  const s = profile.scores;
+  app.innerHTML = `<div class="home">
+    <h1 class="logo">BIOQ</h1>
+    <button class="card c1" onclick="go('wordle')"><h3>🧬 Bio Wordle</h3><p>Guess the 5-letter biology word · ${s.wordle} pts</p></button>
+    <button class="card c2" onclick="go('conn')"><h3>🍀 Bio Connections</h3><p>Sort 16 terms into 4 groups · ${s.conn} pts</p></button>
+    <button class="card c3" onclick="go('bridge')"><h3>🌉 Word Bridge</h3><p>Change one letter at a time · ${s.bridge} pts</p></button>
+    <button class="card c4" onclick="go('quiz')"><h3>🧪 Bio Quiz</h3><p>20 questions, rising difficulty · ${s.quiz} pts</p></button>
+    <button class="glass" onclick="go('board')">Leaderboard</button>
+    <button class="glass" style="font-size:15px;font-weight:600" onclick="go('me')">${esc(profile.name)} · ${total(s)} pts<br>View my results</button>
+  </div>`;
+}
+function meScreen(){
+  const s = profile.scores, p = profile.plays;
+  app.innerHTML = topbar('My results') + `<div class="wrap">
+    <div class="stat"><span>Player</span><span>${esc(profile.name)}</span></div>
+    <div class="stat"><span>Total points</span><span>${total(s)}</span></div>
+    ${Object.keys(GAMES).map(k => `<div class="stat"><span>${GAMES[k]} <small style="color:var(--muted)">(${p[k] || 0} plays)</small></span><span>${s[k] || 0} pts</span></div>`).join('')}
+    <div class="row"><button class="btn ghost" onclick="nameScreen()">Change name</button></div></div>`;
+}
+
+/* ============ QUIZ ============ */
+const LV = {1:'Easy', 2:'Medium', 3:'Hard', 4:'Expert'}, PTS = {1:1, 2:2, 3:3, 4:5}, LET = ['A','B','C','D'];
+const QUIZ = [
+ {l:1,q:'Which organ pumps blood around the body?',o:['Brain','Heart','Lung','Stomach'],a:1},
+ {l:1,q:'How many legs does a human usually have?',o:['2','4','6','8'],a:0},
+ {l:1,q:'Which organ helps us see?',o:['Ear','Nose','Eye','Skin'],a:2},
+ {l:1,q:'What do humans need to breathe?',o:['Oxygen','Sugar','Salt','Helium'],a:0},
+ {l:1,q:'Which animal says “moo”?',o:['Dog','Cow','Cat','Horse'],a:1},
+ {l:1,q:'Which of these is a plant?',o:['Rose','Tiger','Fish','Eagle'],a:0},
+ {l:2,q:'What is the basic unit of life?',o:['Organ','Cell','Bone','Muscle'],a:1},
+ {l:2,q:'Which organ helps us think?',o:['Heart','Brain','Kidney','Lung'],a:1},
+ {l:2,q:'Which part of a plant absorbs water from the soil?',o:['Flower','Leaf','Root','Fruit'],a:2},
+ {l:2,q:'Which animal is a mammal?',o:['Shark','Frog','Dolphin','Snake'],a:2},
+ {l:2,q:'What do bees collect from flowers?',o:['Milk','Nectar','Blood','Salt'],a:1},
+ {l:2,q:'Which of these is NOT alive?',o:['Tree','Mushroom','Rock','Bacterium'],a:2},
+ {l:2,q:'What is DNA responsible for?',o:['Carrying genetic information','Digesting food','Pumping blood','Producing sound'],a:0},
+ {l:2,q:'Which cells help fight infections?',o:['Red blood cells','White blood cells','Skin cells','Bone cells'],a:1},
+ {l:2,q:'What is the green pigment in plants called?',o:['Glucose','Chlorophyll','Protein','Calcium'],a:1},
+ {l:2,q:'Which organ filters waste from the blood?',o:['Heart','Kidney','Brain','Stomach'],a:1},
+ {l:2,q:'What do plants need for photosynthesis?',o:['Sunlight','Plastic','Meat','Salt'],a:0},
+ {l:2,q:'Which animals eat mainly plants?',o:['Carnivores','Herbivores','Predators','Parasites'],a:1},
+ {l:3,q:'How many chromosomes are normally found in a human body cell?',o:['23','46','44','92'],a:1},
+ {l:3,q:'What gas do plants release during photosynthesis?',o:['Oxygen','Nitrogen','Carbon dioxide','Hydrogen'],a:0},
+ {l:3,q:'Which system carries blood around the body?',o:['Nervous system','Digestive system','Circulatory system','Respiratory system'],a:2},
+ {l:3,q:'Which blood cells carry oxygen?',o:['White blood cells','Red blood cells','Platelets','Nerve cells'],a:1},
+ {l:3,q:'What is the main function of the lungs?',o:['Digest food','Pump blood','Exchange gases','Control movement'],a:2},
+ {l:3,q:'Which of these is a vertebrate?',o:['Spider','Earthworm','Butterfly','Fish'],a:3},
+ {l:3,q:'Which organelle is known as the “powerhouse” of the cell?',o:['Nucleus','Ribosome','Mitochondrion','Cell wall'],a:2},
+ {l:3,q:'What is the main function of red blood cells?',o:['Fight bacteria','Carry oxygen','Produce hormones','Digest food'],a:1},
+ {l:3,q:'Which process allows plants to make glucose using sunlight?',o:['Respiration','Digestion','Photosynthesis','Fermentation'],a:2},
+ {l:3,q:'What is the main function of the nucleus?',o:['Store genetic information and control cell activities','Produce oxygen','Digest proteins','Pump blood'],a:0},
+ {l:3,q:'Which molecule is the main source of quick energy for cells?',o:['Glucose','DNA','Calcium','Water'],a:0},
+ {l:3,q:'What happens to a person’s heart rate during most forms of exercise?',o:['It decreases','It stays exactly the same','It increases','It stops briefly'],a:2},
+ {l:4,q:'During which stage of mitosis do chromosomes line up at the cell’s equator?',o:['Prophase','Metaphase','Anaphase','Telophase'],a:1},
+ {l:4,q:'Which enzyme unwinds the DNA double helix during replication?',o:['Helicase','DNA ligase','Lipase','Catalase'],a:0},
+ {l:4,q:'Which molecule delivers amino acids to the ribosome?',o:['mRNA','rRNA','tRNA','DNA'],a:2},
+ {l:4,q:'Which brain region coordinates balance and fine movement?',o:['Hypothalamus','Cerebellum','Pituitary gland','Corpus callosum'],a:1},
+ {l:4,q:'Loss of water vapour from leaves through stomata is called…',o:['Translocation','Respiration','Osmosis','Transpiration'],a:3},
+ {l:4,q:'In a cross Aa × Aa, what fraction of offspring is expected to be homozygous?',o:['1/4','1/2','3/4','All'],a:1},
+ {l:4,q:'Which hormone lowers blood glucose concentration?',o:['Glucagon','Adrenaline','Insulin','Thyroxine'],a:2},
+ {l:4,q:'Which type of cell division produces gametes?',o:['Mitosis','Binary fission','Budding','Meiosis'],a:3},
+ {l:4,q:'Where in the cell does the Krebs cycle take place?',o:['Mitochondrial matrix','Cytoplasm','Nucleus','Chloroplast stroma'],a:0},
+ {l:4,q:'The sodium–potassium pump moves ions by…',o:['Osmosis','Simple diffusion','Facilitated diffusion','Active transport'],a:3}
+];
+let Q;
+function quizStart(){
+  const pick = (lv, n) => shuffle(QUIZ.filter(q => q.l === lv)).slice(0, n);
+  const list = [...pick(1,5), ...pick(2,6), ...pick(3,6), ...pick(4,3)].map(q => {
+    const correct = q.o[q.a], opts = shuffle(q.o);
+    return {...q, opts, ans: opts.indexOf(correct)};
+  });
+  Q = {list, i:0, score:0, right:0, picked:null};
+  quizRender();
+}
+function quizRender(){
+  if (Q.i >= Q.list.length) return quizEnd();
+  const q = Q.list[Q.i];
+  app.innerHTML = topbar('Bio Quiz') + `<div class="wrap">
+    <div class="prog"><div style="width:${Q.i / Q.list.length * 100}%"></div></div>
+    <div class="meta"><span>Question ${Q.i + 1} / ${Q.list.length}</span><span class="lv l${q.l}">${LV[q.l]} · ${PTS[q.l]} pt</span></div>
+    <h3 class="qtext">${esc(q.q)}</h3>
+    <div class="opts">${q.opts.map((o, k) => `<button class="opt" onclick="quizPick(${k})"><b>${LET[k]}</b><span>${esc(o)}</span></button>`).join('')}</div>
+    <div class="row" id="qnext"></div></div>`;
+}
+function quizPick(k){
+  if (Q.picked !== null) return;
+  const q = Q.list[Q.i]; Q.picked = k;
+  const btns = document.querySelectorAll('.opt');
+  btns[q.ans].classList.add('ok');
+  if (k === q.ans) { Q.score += PTS[q.l]; Q.right++; } else btns[k].classList.add('bad');
+  const last = Q.i === Q.list.length - 1;
+  document.getElementById('qnext').innerHTML = `<button class="btn primary" onclick="Q.i++;Q.picked=null;quizRender()">${last ? 'Finish' : 'Next'}</button>`;
+}
+function quizEnd(){
+  addScore('quiz', Q.score);
+  const pct = Q.right / Q.list.length;
+  const grade = pct >= .9 ? 'Biology master! 🏆' : pct >= .7 ? 'Great job! 🌟' : pct >= .5 ? 'Not bad — keep going 💪' : 'Time to revise 📚';
+  app.innerHTML = topbar('Bio Quiz') + `<div class="wrap">
+    <div class="big">${Q.score} pts</div>
+    <p class="center-t">${Q.right} of ${Q.list.length} correct</p>
+    <p class="sub" style="font-size:20px;font-weight:700">${grade}</p>
+    <div class="row"><button class="btn primary" onclick="quizStart()">Play again</button><button class="btn ghost" onclick="go('board')">Leaderboard</button></div></div>`;
+}
+
+/* ============ WORDLE ============ */
+const WORDS = [
+ ['XYLEM','Plant tissue that carries water upwards'],['STOMA','A pore in a leaf used for gas exchange'],['LYMPH','Fluid carried by vessels of the immune system'],
+ ['ALGAE','Simple photosynthetic organisms, often in water'],['FUNGI','Kingdom that contains mushrooms and yeasts'],['SPORE','Reproductive cell of ferns and fungi'],
+ ['LARVA','Juvenile stage of many insects'],['NICHE','An organism’s role within its ecosystem'],['TRAIT','An inherited characteristic'],
+ ['CLONE','A genetically identical copy'],['GENUS','Taxonomic rank just above species'],['CILIA','Tiny hair-like projections on some cells'],
+ ['VILLI','Finger-like folds that absorb nutrients in the small intestine'],['FEMUR','The thigh bone'],['TIBIA','The shin bone'],
+ ['AORTA','The largest artery in the body'],['ATRIA','Upper chambers of the heart (plural)'],['LIPID','Biomolecule group that includes fats and oils'],
+ ['AMINO','___ acid: the building block of proteins'],['PHAGE','A virus that infects bacteria'],['PRION','An infectious misfolded protein'],
+ ['OVARY','Organ that produces egg cells'],['OVULE','Part of a flower that becomes a seed after fertilisation'],['SEPAL','Green leaf-like part protecting a flower bud'],
+ ['PETAL','Colourful flower part that attracts pollinators'],['STYLE','Stalk joining the stigma to the ovary in a flower'],['CODON','Three-base unit of an mRNA molecule'],
+ ['HELIX','The shape of a DNA molecule'],['SERUM','Clear fluid left after blood has clotted'],['COLON','Another name for the large intestine'],
+ ['ILEUM','Final section of the small intestine'],['MOLAR','Broad tooth used for grinding food'],['HYPHA','Thread-like filament of a fungus'],
+ ['RENAL','Relating to the kidneys'],['CHYME','Semi-liquid food mass leaving the stomach'],['LOCUS','The position of a gene on a chromosome'],
+ ['TAXON','A group of organisms in classification'],['GLAND','Organ that secretes hormones or other substances']
+];
+const KB = ['QWERTYUIOP', 'ASDFGHJKL', ['ENTER', ...'ZXCVBNM', 'DEL']];
+function kbHTML(states){
+  return `<div class="kb">${KB.map(r => `<div class="kr">${[...r].length ? (Array.isArray(r) ? r : [...r]).map(k => {
+    const wide = k === 'ENTER' || k === 'DEL';
+    const label = k === 'DEL' ? '⌫' : k === 'ENTER' ? 'Enter' : k;
+    return `<button class="key ${wide ? 'wide' : ''} ${k === 'ENTER' ? 'enter' : ''} ${(states && states[k]) || ''}" onclick="press('${k}')">${label}</button>`;
+  }).join('') : ''}</div>`).join('')}</div>`;
+}
+let W;
+function wordleStart(){
+  const [word, clue] = rnd(WORDS);
+  W = {word, clue, rows:[], cur:'', over:false, hint:false, keys:{}, rev:-1, shake:false, msg:''};
+  app.innerHTML = topbar('Bio Wordle') + `<div class="wrap" style="padding-bottom:8px">
+    <p class="center-t" style="margin:0">Find the 5-letter biology word in 6 tries.</p>
+    <div id="wboard"></div><div id="wmsg" class="msg"></div>
+    <div id="wclue"></div><div class="row" id="wact" style="margin:8px 0 14px"></div></div><div id="wkb"></div>`;
+  onKey = wordleKey; wordleDraw();
+}
+function evalGuess(g, w){
+  const res = Array(5).fill('absent'), cnt = {};
+  for (let i = 0; i < 5; i++) { if (g[i] === w[i]) res[i] = 'correct'; else cnt[w[i]] = (cnt[w[i]] || 0) + 1; }
+  for (let i = 0; i < 5; i++) { if (res[i] !== 'correct' && cnt[g[i]] > 0) { res[i] = 'present'; cnt[g[i]]--; } }
+  return res;
+}
+function wordleDraw(){
+  let h = '<div class="board">';
+  for (let r = 0; r < 6; r++) {
+    h += `<div class="brow ${W.shake && r === W.rows.length ? 'shake' : ''}">`;
+    for (let c = 0; c < 5; c++) {
+      if (r < W.rows.length) h += `<div class="tile ${W.rows[r].res[c]} ${r === W.rev ? 'rev' : ''}" style="animation-delay:${c * .15}s">${W.rows[r].g[c]}</div>`;
+      else if (r === W.rows.length && !W.over) { const ch = W.cur[c] || ''; h += `<div class="tile ${ch ? 'f' : ''}">${ch}</div>`; }
+      else h += '<div class="tile"></div>';
+    }
+    h += '</div>';
+  }
+  document.getElementById('wboard').innerHTML = h + '</div>';
+  document.getElementById('wmsg').textContent = W.msg;
+  document.getElementById('wclue').innerHTML = W.hint ? `<div class="clue" style="margin:0 0 8px">💡 ${esc(W.clue)}</div>` : '';
+  document.getElementById('wact').innerHTML = W.over
+    ? `<button class="btn primary" onclick="wordleStart()">Next word</button><button class="btn ghost" onclick="go('board')">Leaderboard</button>`
+    : (W.hint ? '' : `<button class="btn ghost" onclick="wordleHint()">Show clue (−1 pt)</button>`);
+  document.getElementById('wkb').innerHTML = kbHTML(W.keys);
+}
+function wordleHint(){ if (W.over) return; W.hint = true; wordleDraw(); }
+function wordleKey(k){
+  if (W.over) return;
+  W.msg = ''; W.shake = false;
+  if (k === 'DEL') W.cur = W.cur.slice(0, -1);
+  else if (k === 'ENTER') {
+    if (W.cur.length < 5) { W.msg = 'Not enough letters'; W.shake = true; }
+    else {
+      const g = W.cur, res = evalGuess(g, W.word);
+      W.rows.push({g, res}); W.rev = W.rows.length - 1; W.cur = '';
+      const rank = {absent:1, present:2, correct:3};
+      [...g].forEach((ch, i) => { if (!W.keys[ch] || rank[res[i]] > rank[W.keys[ch]]) W.keys[ch] = res[i]; });
+      if (g === W.word) {
+        const pts = Math.max(1, 12 - 2 * (W.rows.length - 1) - (W.hint ? 1 : 0));
+        W.over = true; addScore('wordle', pts); W.msg = `Correct! +${pts} pts 🎉`;
+      } else if (W.rows.length === 6) { W.over = true; W.msg = `The word was ${W.word}`; addScore('wordle', 0); }
+    }
+  } else if (W.cur.length < 5) W.cur += k;
+  wordleDraw();
+}
+
+/* ============ CONNECTIONS ============ */
+const CONN = [
+ {g:[{n:'Parts of a neuron',c:'y',w:['AXON','DENDRITE','SYNAPSE','MYELIN']},
+     {n:'Plant tissues',c:'g',w:['XYLEM','PHLOEM','CAMBIUM','EPIDERMIS']},
+     {n:'Cell organelles',c:'b',w:['RIBOSOME','VACUOLE','LYSOSOME','GOLGI']},
+     {n:'Bones',c:'p',w:['FEMUR','TIBIA','ULNA','STERNUM']}]},
+ {g:[{n:'Digestive enzymes',c:'y',w:['AMYLASE','LIPASE','PEPSIN','TRYPSIN']},
+     {n:'Hormones',c:'g',w:['INSULIN','GLUCAGON','ADRENALINE','THYROXINE']},
+     {n:'Blood components',c:'b',w:['PLASMA','PLATELETS','HAEMOGLOBIN','FIBRINOGEN']},
+     {n:'DNA bases',c:'p',w:['ADENINE','GUANINE','THYMINE','CYTOSINE']}]},
+ {g:[{n:'Mammals (not fish!)',c:'y',w:['BAT','DOLPHIN','PLATYPUS','WHALE']},
+     {n:'Amphibians',c:'g',w:['NEWT','AXOLOTL','TOAD','SALAMANDER']},
+     {n:'Arthropods',c:'b',w:['SPIDER','CRAB','SCORPION','CENTIPEDE']},
+     {n:'Molluscs',c:'p',w:['SQUID','OCTOPUS','SNAIL','OYSTER']}]},
+ {g:[{n:'Stages of mitosis',c:'y',w:['PROPHASE','METAPHASE','ANAPHASE','TELOPHASE']},
+     {n:'Parts of the heart',c:'g',w:['ATRIUM','VENTRICLE','AORTA','VALVE']},
+     {n:'Levels of body organisation',c:'b',w:['CELL','TISSUE','ORGAN','SYSTEM']},
+     {n:'Levels of ecology',c:'p',w:['POPULATION','COMMUNITY','ECOSYSTEM','BIOSPHERE']}]}
+];
+let C, lastConn = -1;
+function connStart(){
+  let idx; do { idx = Math.floor(Math.random() * CONN.length); } while (idx === lastConn && CONN.length > 1);
+  lastConn = idx;
+  const p = CONN[idx];
+  C = {p, tiles: shuffle(p.g.flatMap((g, gi) => g.w.map(w => ({w, gi})))), sel:[], solved:[], mistakes:0, tried:[], msg:'', over:false, win:false, earned:0};
+  connDraw();
+}
+function connDraw(){
+  const solvedHTML = C.solved.map(gi => { const g = C.p.g[gi]; return `<div class="sg ${g.c}"><b>${g.n}</b><span>${g.w.join(', ')}</span></div>`; }).join('');
+  const tiles = C.tiles.map(t => `<button class="ct ${C.sel.includes(t.w) ? 'sel' : ''}" onclick="connTap('${t.w}')" ${C.over ? 'disabled' : ''}>${t.w}</button>`).join('');
+  const dots = Array.from({length:4}, (_, i) => `<span class="dot ${i < 4 - C.mistakes ? '' : 'off'}"></span>`).join('');
+  app.innerHTML = topbar('Bio Connections') + `<div class="wrap">
+    <p class="center-t" style="margin:0 0 12px">Create four groups of four!</p>
+    ${solvedHTML}
+    <div class="cgrid">${tiles}</div>
+    <div class="msg">${C.msg}</div>
+    <div class="dots">Mistakes remaining: ${dots}</div>
+    <div class="row">${C.over
+      ? `<button class="btn primary" onclick="connStart()">Next puzzle</button><button class="btn ghost" onclick="go('board')">Leaderboard</button>`
+      : `<button class="btn ghost" onclick="connShuffle()">Shuffle</button><button class="btn ghost" onclick="C.sel=[];connDraw()">Deselect all</button><button class="btn primary" onclick="connSubmit()" ${C.sel.length === 4 ? '' : 'disabled'}>Submit</button>`}
+    </div></div>`;
+}
+function connTap(w){
+  if (C.over) return;
+  const i = C.sel.indexOf(w);
+  if (i >= 0) C.sel.splice(i, 1); else if (C.sel.length < 4) C.sel.push(w);
+  C.msg = ''; connDraw();
+}
+function connShuffle(){ C.tiles = shuffle(C.tiles); connDraw(); }
+function connSubmit(){
+  if (C.sel.length !== 4 || C.over) return;
+  const key = C.sel.slice().sort().join('|');
+  if (C.tried.includes(key)) { C.msg = 'Already guessed!'; return connDraw(); }
+  const counts = {};
+  C.sel.forEach(w => { const gi = C.tiles.find(t => t.w === w).gi; counts[gi] = (counts[gi] || 0) + 1; });
+  const best = Math.max(...Object.values(counts));
+  if (best === 4) {
+    const gi = +Object.keys(counts)[0];
+    C.solved.push(gi); C.tiles = C.tiles.filter(t => t.gi !== gi); C.sel = []; C.msg = 'Nice!';
+    if (C.solved.length === 4) { C.over = true; C.win = true; C.msg = ''; finishConn(); return; }
+  } else {
+    C.tried.push(key); C.mistakes++;
+    C.msg = best === 3 ? 'One away!' : 'Not quite.';
+    if (C.mistakes >= 4) {
+      C.earned = C.solved.length * 5; C.over = true; finishConn(true);
+      return;
+    }
+  }
+  connDraw();
+}
+function finishConn(lost){
+  if (!lost) C.earned = 20 + 10 + (4 - C.mistakes) * 3;
+  addScore('conn', C.earned);
+  if (lost) {
+    [0, 1, 2, 3].filter(g => !C.solved.includes(g)).forEach(g => C.solved.push(g));
+    C.tiles = []; C.sel = [];
+    C.msg = `Out of mistakes. +${C.earned} pts`;
+  } else C.msg = `Solved! +${C.earned} pts 🎉`;
+  connDraw();
+}
+
+/* ============ WORD BRIDGE ============ */
+const BRIDGES = [
+ {chain:['BONE','CONE','CORE','CORN','CORM'], clues:[null,'Photoreceptor cell in the retina that detects colour','The central part of an apple that holds the seeds','A cereal crop; also called maize','A swollen underground plant stem, e.g. crocus',null]},
+ {chain:['BEAK','BEAT','HEAT','HEAR','HEAD'], clues:[null,'What your heart does about 70 times a minute','Thermal energy; humans lose it through the skin','What the cochlea allows you to do','Body part that houses the brain',null]},
+ {chain:['MOLD','MOLE','MALE','MATE','MITE'], clues:[null,'A small burrowing mammal with velvet fur','The sex that produces sperm cells','To pair up and reproduce','A tiny arachnid, e.g. the dust ___',null]}
+];
+let B, lastBr = -1;
+function bridgeStart(){
+  let idx; do { idx = Math.floor(Math.random() * BRIDGES.length); } while (idx === lastBr && BRIDGES.length > 1);
+  lastBr = idx;
+  B = {d:BRIDGES[idx], i:1, typed:'', hints:0, totalHints:0, mistakes:0, msg:'', shake:false, over:false, earned:0};
+  app.innerHTML = topbar('Word Bridge', 'var(--pink)') + `<div class="wrap" style="padding-bottom:6px">
+    <p class="center-t" style="margin:0">Change exactly one letter at each step to reach the last word.</p>
+    <div id="bladder"></div><div id="bclue"></div><div id="bmsg" class="msg"></div><div class="row" id="bact" style="margin:0 0 12px"></div></div><div id="bkb"></div>`;
+  onKey = bridgeKey; bridgeDraw();
+}
+function bridgeDraw(){
+  const ch = B.d.chain, last = ch.length - 1, L = ch[0].length;
+  let h = '<div class="ladder">';
+  ch.forEach((w, r) => {
+    h += `<div class="lrow ${B.shake && r === B.i ? 'shake' : ''}">`;
+    for (let c = 0; c < L; c++) {
+      let cls = 'lt', t = '';
+      if (r === 0 || r === last) { cls += ' fixed'; t = w[c]; }
+      else if (r < B.i) { cls += ' done'; t = w[c]; }
+      else if (r === B.i && !B.over) {
+        cls += ' act';
+        if (c < B.hints) { cls += ' hint'; t = w[c]; } else t = B.typed[c - B.hints] || '';
+      }
+      h += `<div class="${cls}">${t}</div>`;
+    }
+    h += '</div>';
+  });
+  document.getElementById('bladder').innerHTML = h + '</div>';
+  document.getElementById('bclue').innerHTML = B.over ? '' : `<div class="clue">Word ${B.i} of ${last - 1} · ${esc(B.d.clues[B.i])}</div>`;
+  document.getElementById('bmsg').textContent = B.msg;
+  document.getElementById('bact').innerHTML = B.over
+    ? `<button class="btn primary" onclick="bridgeStart()">Next bridge</button><button class="btn ghost" onclick="go('board')">Leaderboard</button>`
+    : `<button class="btn ghost" onclick="bridgeHint()" ${B.hints >= L - 1 ? 'disabled' : ''}>Hint (−1 pt)</button>`;
+  document.getElementById('bkb').innerHTML = B.over ? '' : kbHTML({});
+}
+function bridgeHint(){
+  const L = B.d.chain[0].length;
+  if (B.over || B.hints >= L - 1) return;
+  B.hints++; B.totalHints++; B.typed = B.typed.slice(0, L - B.hints); B.msg = ''; bridgeDraw();
+}
+function oneApart(a, b){ let d = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) d++; return d === 1; }
+function bridgeKey(k){
+  if (B.over) return;
+  const ch = B.d.chain, L = ch[0].length, ans = ch[B.i];
+  B.msg = ''; B.shake = false;
+  if (k === 'DEL') B.typed = B.typed.slice(0, -1);
+  else if (k === 'ENTER') {
+    if (B.hints + B.typed.length < L) { B.msg = 'Not enough letters'; B.shake = true; }
+    else {
+      const guess = ans.slice(0, B.hints) + B.typed;
+      if (guess === ans) {
+        B.i++; B.typed = ''; B.hints = 0;
+        if (B.i === ch.length - 1) {
+          B.over = true; B.earned = Math.max(3, 15 - B.totalHints - B.mistakes);
+          addScore('bridge', B.earned); B.msg = `Bridge complete! +${B.earned} pts 🌉`;
+        } else B.msg = 'Correct!';
+      } else {
+        B.mistakes++; B.shake = true;
+        B.msg = oneApart(ch[B.i - 1], guess) ? 'A valid step, but not the word the clue describes.' : 'Change exactly one letter from the word above.';
+      }
+    }
+  } else if (B.hints + B.typed.length < L) B.typed += k;
+  bridgeDraw();
+}
+
+/* ============ LEADERBOARD ============ */
+const TABS = [['total','Total'],['quiz','Quiz'],['wordle','Wordle'],['conn','Connections'],['bridge','Bridge']];
+async function boardScreen(tab){
+  app.innerHTML = topbar('Leaderboard') + `<div class="tabs">${TABS.map(([k, n]) => `<button class="tab ${k === tab ? 'on' : ''}" onclick="boardScreen('${k}')">${n}</button>`).join('')}</div><div class="note">Loading…</div>`;
+  let shared = false, rows = [];
+  if (cloud.db) {
+    try { const s = await cloud.db.collection('players').get(); rows = s.docs.map(d => ({id:d.id, ...d.data()})); shared = true; } catch(e){}
+  }
+  if (!shared && profile) rows = [{id:'me', name:profile.name, scores:profile.scores, plays:profile.plays}];
+  const val = r => tab === 'total' ? total(r.scores) : ((r.scores || {})[tab] || 0);
+  rows = rows.filter(r => r && r.name).sort((a, b) => val(b) - val(a)).slice(0, 50);
+  const meId = shared ? cloud.uid : 'me';
+  const body = rows.length ? rows.map((r, i) => `<div class="lbr ${r.id === meId ? 'me' : ''}"><span class="rk">${i < 3 ? ['🥇','🥈','🥉'][i] : i + 1}</span><span class="nm">${esc(r.name)}${r.id === meId ? ' (you)' : ''}</span><span class="pt">${val(r)}</span></div>`).join('') : '<div class="note">No scores yet — go play!</div>';
+  if (view !== 'board') return;
+  app.innerHTML = topbar('Leaderboard') + `<div class="tabs">${TABS.map(([k, n]) => `<button class="tab ${k === tab ? 'on' : ''}" onclick="boardScreen('${k}')">${n}</button>`).join('')}</div>
+    <div class="note">${shared ? 'Shared leaderboard — all players' : 'Saved on this device only'}</div><div class="lb">${body}</div>`;
+}
+
+/* ============ boot ============ */
+(profile && profile.name) ? homeScreen() : nameScreen();
+initCloud();
+</script>
+</body>
+</html>
